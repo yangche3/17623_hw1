@@ -16,7 +16,7 @@
  * @modemail    contact@achinthagunasekara.com
  */
 
-package simplejavatexteditor;
+package SimpleJavaTextEditor;
 
 import javax.swing.JTextArea;
 

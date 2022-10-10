@@ -29,7 +29,7 @@
  * Removed unsused imports
  */
 
-package simplejavatexteditor;
+package SimpleJavaTextEditor;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;

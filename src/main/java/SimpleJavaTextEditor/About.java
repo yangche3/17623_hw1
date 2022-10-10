@@ -24,7 +24,7 @@
  * Tested with java 8.
  */
 
-package simplejavatexteditor;
+package SimpleJavaTextEditor;
 
 import javax.swing.*;
 import java.awt.FlowLayout;

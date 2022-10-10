@@ -1,3 +1,4 @@
+package SimpleJavaTextEditor;
 /**
  * @name        Simple Java NotePad
  * @package     ph.notepad
@@ -16,7 +17,7 @@
  * @modemail    contact@achinthagunasekara.com
  */
 
-package simplejavatexteditor;
+
 
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
@@ -35,7 +36,7 @@ public class SimpleJavaTextEditor extends JTextPane {
      */
     public static void main(String[] args) {
     	try {
-    		UIManager.setLookAndFeel ("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+    		UIManager.setLookAndFeel (UIManager.getCrossPlatformLookAndFeelClassName());
     	} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
     		e.printStackTrace();
     	}
