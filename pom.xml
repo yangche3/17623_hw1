@@ -8,7 +8,7 @@
 
     <artifactId>Simple-Java-Text-Editor</artifactId>
     <properties>
-        <exec.mainClass>SimpleJavaTextEditor.SimpleJavaTextEditor</exec.mainClass>
+        <exec.mainClass>main.java.SimpleJavaTextEditor.SimpleJavaTextEditor</exec.mainClass>
     
     </properties>
     

@@ -1,4 +1,4 @@
-package SimpleJavaTextEditor;
+package main.java.SimpleJavaTextEditor;
 /**
  * @name        Simple Java NotePad
  * @package     ph.notepad
@@ -19,6 +19,7 @@ package SimpleJavaTextEditor;
 
 
 
+import javax.swing.ImageIcon;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -41,6 +42,8 @@ public class SimpleJavaTextEditor extends JTextPane {
     		e.printStackTrace();
     	}
     	
+        ImageIcon newIcon = new ImageIcon(UI.class.getResource("/icons/new.png"));
+        
         new UI().setVisible(true);
     }
 

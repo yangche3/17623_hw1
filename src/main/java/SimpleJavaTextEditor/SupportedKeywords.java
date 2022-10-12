@@ -1,4 +1,4 @@
-package SimpleJavaTextEditor;
+package main.java.SimpleJavaTextEditor;
 
 import java.util.ArrayList;
 
