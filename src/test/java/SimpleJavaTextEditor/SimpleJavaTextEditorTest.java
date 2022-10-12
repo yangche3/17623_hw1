@@ -1,13 +1,16 @@
 package test.java.SimpleJavaTextEditor;
 
-// import static org.junit.Assert.assertTrue;
+// import main.java.SimpleJavaTextEditor;
+import org.junit.Assert;
+import org.junit.Test;
 
-// import org.junit.Test;
+public class SimpleJavaTextEditorTest {
 
-// public class SimpleJavaTextEditorTest {
-
-//     @Test
-//     public void testTests(){
-//         assertTrue("test", true);
-//     }
-// }
+    /**
+     * 
+     */
+    @Test
+    public void simpleAssertTests(){
+        Assert.assertTrue(true);
+    }
+}
