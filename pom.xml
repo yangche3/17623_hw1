@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.develogical</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <artifactId>Simple-Java-Text-Editor</artifactId>
     <properties>
         <exec.mainClass>main.java.SimpleJavaTextEditor.SimpleJavaTextEditor</exec.mainClass>
