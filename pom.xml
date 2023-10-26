@@ -27,6 +27,17 @@
             <artifactId>javafx-swing</artifactId>
             <version>20-ea+3</version>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.12.4</version> <!-- Use the latest version available -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.9.11</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
