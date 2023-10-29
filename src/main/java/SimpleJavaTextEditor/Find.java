@@ -29,7 +29,7 @@
  * Removed unsused imports
  */
 
-package main.java.SimpleJavaTextEditor;
+package SimpleJavaTextEditor;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -39,7 +39,7 @@ public class Find extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     int startIndex=0;
-        int select_start=-1;
+    int select_start=-1;
     JLabel lab1, lab2;
     JTextField textF, textR;
     JButton findBtn, findNext, replace, replaceAll, cancel;

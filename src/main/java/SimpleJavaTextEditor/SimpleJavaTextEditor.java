@@ -1,4 +1,4 @@
-package main.java.SimpleJavaTextEditor;
+package SimpleJavaTextEditor;
 /**
  * @name        Simple Java NotePad
  * @package     ph.notepad
