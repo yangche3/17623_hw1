@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>About.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec, jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">About.java</span></div><h1>About.java</h1><pre class="source lang-java linenums">/**
+ * @name        Simple Java NotePad
+ * @package     ph.notepad
+ * @file        UI.java
+ * @author      SORIA Pierre-Henry
+ * @email       pierrehs@hotmail.com
+ * @link        http://github.com/pH-7
+ * @copyright   Copyright Pierre-Henry SORIA, All Rights Reserved.
+ * @license     Apache (http://www.apache.org/licenses/LICENSE-2.0)
+ * @create      2012-05-04
+ * @update      2015-09-4
+ *
+ *
+ * @modifiedby  Achintha Gunasekara
+ * @modweb      http://www.achinthagunasekara.com
+ * @modemail    contact@achinthagunasekara.com
+ *
+ * @Modifiedby SidaDan
+ * @modemail Fschultz@sinf.de
+ * Bug fixed. If JTextArea txt not empty and the user will
+ * shutdown the Simple Java NotePad, then the Simple Java NotePad
+ * is only hidden (still running). So I added a WindowListener
+ * an call method dispose() for this frame.
+ * Tested with java 8.
+ */
+
+package SimpleJavaTextEditor;
+
+import javax.swing.*;
+import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+public class About {
+
+    private final JFrame frame;
+    private final JPanel panel;
+    private String contentText;
+    private final JLabel text;
+
+<span class="nc" id="L41">    public About(UI ui) {</span>
+<span class="nc" id="L42">        panel = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L43">        panel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));</span>
+<span class="nc" id="L44">        frame = new JFrame();</span>
+
+<span class="nc" id="L46">        frame.addWindowListener(new WindowAdapter() {</span>
+            @Override
+            public void windowClosing(WindowEvent e) {
+<span class="nc" id="L49">                frame.dispose();</span>
+<span class="nc" id="L50">            }</span>
+        });
+
+
+<span class="nc" id="L54">        frame.setVisible(true);</span>
+<span class="nc" id="L55">        frame.setSize(500,300);</span>
+<span class="nc" id="L56">        frame.setLocationRelativeTo(ui);</span>
+<span class="nc" id="L57">        text = new JLabel();</span>
+<span class="nc" id="L58">    }</span>
+
+    public void me() {
+<span class="nc" id="L61">        frame.setTitle(&quot;About Me - &quot; + SimpleJavaTextEditor.NAME);</span>
+
+<span class="nc" id="L63">        contentText =</span>
+        &quot;&lt;html&gt;&lt;body&gt;&lt;p&gt;&quot; +
+        &quot;Author: Pierre-Henry Soria&lt;br /&gt;&quot; +
+        &quot;Contact me at: &quot; +
+        &quot;&lt;a href='mailto:&quot; + SimpleJavaTextEditor.AUTHOR_EMAIL + &quot;?subject=About the NotePad PH Software'&gt;&quot; + SimpleJavaTextEditor.AUTHOR_EMAIL + &quot;&lt;/a&gt;&quot; +
+                &quot;&lt;br /&gt;&lt;br /&gt;&quot; +
+                &quot;Modified By: Achintha Gunasekara&lt;br /&gt;&quot; +
+                &quot;Contact me at: &lt;a href='mailto:&quot; + SimpleJavaTextEditor.EDITOR_EMAIL + &quot;?subject=About the NotePad PH Software'&gt;&quot; + SimpleJavaTextEditor.EDITOR_EMAIL + &quot;&lt;/a&gt;&quot; +
+        &quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+
+<span class="nc" id="L73">        text.setText(contentText);</span>
+<span class="nc" id="L74">        panel.add(text);</span>
+<span class="nc" id="L75">        frame.add(panel);</span>
+<span class="nc" id="L76">    }</span>
+
+    public void software() {
+<span class="nc" id="L79">        frame.setTitle(&quot;About Me - &quot; + SimpleJavaTextEditor.NAME);</span>
+
+<span class="nc" id="L81">        contentText =</span>
+        &quot;&lt;html&gt;&lt;body&gt;&lt;p&gt;&quot; +
+        &quot;Name: &quot; + SimpleJavaTextEditor.NAME + &quot;&lt;br /&gt;&quot; +
+        &quot;Version: &quot; + SimpleJavaTextEditor.VERSION +
+        &quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+
+<span class="nc" id="L87">        text.setText(contentText);</span>
+<span class="nc" id="L88">        panel.add(text);</span>
+<span class="nc" id="L89">        frame.add(panel);</span>
+<span class="nc" id="L90">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

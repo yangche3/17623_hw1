@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FEditTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">FEditTest.java</span></div><h1>FEditTest.java</h1><pre class="source lang-java linenums">package SimpleJavaTextEditor;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import javax.swing.*;
+<span class="nc" id="L8">public class FEditTest {</span>
+    private JTextArea textArea;
+
+    @BeforeEach
+    void setUp() {
+<span class="nc" id="L13">        textArea = new JTextArea();</span>
+<span class="nc" id="L14">        textArea.setText(&quot;&quot;&quot;</span>
+                class Test{ \s
+                    public static void main(String args[]){ \s
+                     System.out.println(&quot;Hello Java&quot;); \s
+                    } \s
+                } \s&quot;&quot;&quot;);
+<span class="nc" id="L20">    }</span>
+
+    @Test
+    void testClear(){
+<span class="nc" id="L24">        FEdit.clear(textArea);</span>
+<span class="nc" id="L25">        Assertions.assertEquals(&quot;&quot;, textArea.getText());</span>
+<span class="nc" id="L26">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">UI.java</span></div><h1>UI.java</h1><pre class="source lang-java linenums">/**
+* @name        Simple Java NotePad
+* @package ph.notepad
+* @file UI.java
+*
+* @author Pierre-Henry Soria
+* @email pierrehenrysoria@gmail.com
+* @link        http://github.com/pH-7
+*
+* @copyright   Copyright Pierre-Henry SORIA, All Rights Reserved.
+* @license     Apache (http://www.apache.org/licenses/LICENSE-2.0)
+* @create      2012-04-05
+* @update      2017-02-18
+*
+* @modifiedby  Achintha Gunasekara
+* @modemail    contact@achinthagunasekara.com
+*
+* @modifiedby  Marcus Redgrave-Close
+* @modemail    marcusrc1@hotmail.co.uk
+*
+* @Modifiedby SidaDan
+* @modemail Fschultz@sinf.de
+* Added Tooltip Combobox Font type and Font size
+* Overwrite method processWindowEvent to detect window closing event.
+* Added safety query to save the file before exit
+* or the user select &quot;newfile&quot;
+* Only available if the user has pressed a key
+* Added safety query if user pressed the clearButton
+*
+* @Modifiedby SidaDan
+* @modemail Fschultz@sinf.de
+* Removed unuse objects like container,  Border emptyBorder
+* Removed unsused imports
+*
+* @Modifiedby Giorgos Pasentsis
+* @modemail gpasents@gmail.com
+*/
+package SimpleJavaTextEditor;
+
+import java.lang.reflect.Method;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Scanner;
+import javax.swing.text.DefaultEditorKit;
+
+public class UI extends JFrame implements ActionListener {
+
+<span class="nc" id="L62">   private final String[] dragDropExtensionFilter = {&quot;.txt&quot;, &quot;.dat&quot;, &quot;.log&quot;, &quot;.xml&quot;, &quot;.mf&quot;, &quot;.html&quot;};</span>
+<span class="nc" id="L63">   private static long serialVersionUID = 1L;</span>
+   private final JTextArea textArea;
+   private final JMenuBar menuBar;
+   private final JComboBox&lt;String&gt; fontType;
+   private final JComboBox&lt;Integer&gt; fontSize;
+   private final JMenu menuFile, menuEdit, menuFind, menuAbout;
+   private final JMenuItem newFile, openFile, saveFile, close, cut, copy, paste, clearFile, selectAll, quickFind,
+           aboutMe, aboutSoftware, wordWrap;
+   private final JToolBar mainToolbar;
+   JButton newButton, openButton, saveButton, clearButton, quickButton, aboutMeButton, aboutButton, closeButton, boldButton, italicButton;
+   private final Action selectAllAction;
+
+   //setup icons - Bold and Italic
+<span class="nc" id="L76">   private final ImageIcon boldIcon = new ImageIcon(UI.class.getResource(&quot;/icons/bold.png&quot;));</span>
+<span class="nc" id="L77">   private final ImageIcon italicIcon = new ImageIcon(&quot;/icons/italic.png&quot;);</span>
+
+   // setup icons - File Menu
+//    String fileName = &quot;/icons/new.png&quot;
+//    System.out.println(&quot;\ngetResource : &quot; + fileName);
+//    File file = app.getFileFromResource(fileName);
+//    printFile(file);
+
+
+<span class="nc" id="L86">   private final ImageIcon newIcon = new ImageIcon(UI.class.getResource(&quot;/icons/new.png&quot;));</span>
+<span class="nc" id="L87">   private final ImageIcon openIcon = new ImageIcon(UI.class.getResource(&quot;/icons/open.png&quot;));</span>
+<span class="nc" id="L88">   private final ImageIcon saveIcon = new ImageIcon(UI.class.getResource(&quot;/icons/save.png&quot;));</span>
+<span class="nc" id="L89">   private final ImageIcon closeIcon = new ImageIcon(UI.class.getResource(&quot;/icons/close.png&quot;));</span>
+
+   // setup icons - Edit Menu
+<span class="nc" id="L92">   private final ImageIcon clearIcon = new ImageIcon(UI.class.getResource(&quot;/icons/clear.png&quot;));</span>
+<span class="nc" id="L93">   private final ImageIcon cutIcon = new ImageIcon(UI.class.getResource(&quot;/icons/cut.png&quot;));</span>
+<span class="nc" id="L94">   private final ImageIcon copyIcon = new ImageIcon(UI.class.getResource(&quot;/icons/copy.png&quot;));</span>
+<span class="nc" id="L95">   private final ImageIcon pasteIcon = new ImageIcon(UI.class.getResource(&quot;/icons/paste.png&quot;));</span>
+<span class="nc" id="L96">   private final ImageIcon selectAllIcon = new ImageIcon(UI.class.getResource(&quot;/icons/selectall.png&quot;));</span>
+<span class="nc" id="L97">   private final ImageIcon wordwrapIcon = new ImageIcon(UI.class.getResource(&quot;/icons/wordwrap.png&quot;));</span>
+
+   // setup icons - Search Menu
+<span class="nc" id="L100">   private final ImageIcon searchIcon = new ImageIcon(UI.class.getResource(&quot;/icons/search.png&quot;));</span>
+
+   // setup icons - Help Menu
+<span class="nc" id="L103">   private final ImageIcon aboutMeIcon = new ImageIcon(UI.class.getResource(&quot;/icons/about_me.png&quot;));</span>
+<span class="nc" id="L104">   private final ImageIcon aboutIcon = new ImageIcon(UI.class.getResource(&quot;/icons/about.png&quot;));</span>
+
+<span class="nc" id="L106">   private SupportedKeywords kw = new SupportedKeywords();</span>
+<span class="nc" id="L107">   private HighlightText languageHighlighter = new HighlightText(Color.GRAY);</span>
+   AutoComplete autocomplete;
+<span class="nc" id="L109">   private boolean hasListener = false;</span>
+<span class="nc" id="L110">   private boolean edit = false;</span>
+
+<span class="nc" id="L112">   public UI() {</span>
+       try {
+<span class="nc" id="L114">           ImageIcon image = new ImageIcon(UI.class.getResource(&quot;/icons/ste.png&quot;));</span>
+<span class="nc" id="L115">           super.setIconImage(image.getImage());</span>
+<span class="nc" id="L116">       } catch (Exception ex) {</span>
+<span class="nc" id="L117">           ex.printStackTrace();</span>
+<span class="nc" id="L118">       }</span>
+
+       // Set the initial size of the window
+<span class="nc" id="L121">       setSize(800, 500);</span>
+
+       // Set the title of the window
+<span class="nc" id="L124">       setTitle(&quot;Untitled | &quot; + SimpleJavaTextEditor.NAME);</span>
+
+       // Set the default close operation (exit when it gets closed)
+<span class="nc" id="L127">       setDefaultCloseOperation(EXIT_ON_CLOSE);</span>
+
+       // center the frame on the monitor
+<span class="nc" id="L130">       setLocationRelativeTo(null);</span>
+
+       // Set a default font for the TextArea
+<span class="nc" id="L133">       textArea = new JTextArea(&quot;&quot;, 0, 0);</span>
+<span class="nc" id="L134">       textArea.setFont(new Font(&quot;Century Gothic&quot;, Font.PLAIN, 12));</span>
+<span class="nc" id="L135">       textArea.setTabSize(2);</span>
+<span class="nc" id="L136">       textArea.setFont(new Font(&quot;Century Gothic&quot;, Font.PLAIN, 12));</span>
+<span class="nc" id="L137">       textArea.setTabSize(2);</span>
+
+       /* SETTING BY DEFAULT WORD WRAP ENABLED OR TRUE */
+<span class="nc" id="L140">       textArea.setLineWrap(true);</span>
+<span class="nc" id="L141">       DropTarget dropTarget = new DropTarget(textArea, dropTargetListener);</span>
+
+       // Set an higlighter to the JTextArea
+<span class="nc" id="L144">       textArea.addKeyListener(new KeyAdapter() {</span>
+
+           @Override
+           public void keyReleased(KeyEvent e) {
+<span class="nc" id="L148">               setTitle(&quot;Untitled | &quot; + SimpleJavaTextEditor.NAME + &quot;     [ Length: &quot; + textArea.getText().length()</span>
+<span class="nc" id="L149">                       + &quot;    Lines: &quot; + (textArea.getText() + &quot;|&quot;).split(&quot;\n&quot;).length</span>
+<span class="nc" id="L150">                       + &quot;    Words: &quot; + textArea.getText().trim().split(&quot;\\s+&quot;).length + &quot; ]&quot;);</span>
+<span class="nc" id="L151">           }</span>
+
+           @Override
+           public void keyPressed(KeyEvent ke) {
+<span class="nc" id="L155">               edit = true;</span>
+<span class="nc" id="L156">               languageHighlighter.highLight(textArea, kw.getCppKeywords());</span>
+<span class="nc" id="L157">               languageHighlighter.highLight(textArea, kw.getJavaKeywords());</span>
+<span class="nc" id="L158">           }</span>
+       });
+
+<span class="nc" id="L161">       JScrollPane scrollPane = new JScrollPane(textArea);</span>
+<span class="nc" id="L162">       textArea.setWrapStyleWord(true);</span>
+<span class="nc" id="L163">       scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);</span>
+<span class="nc" id="L164">       getContentPane().setLayout(new BorderLayout()); // the BorderLayout bit makes it fill it automatically</span>
+<span class="nc" id="L165">       JPanel panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L166">       panel.add(scrollPane);</span>
+<span class="nc" id="L167">       getContentPane().add(panel);</span>
+
+       // Set the Menus
+<span class="nc" id="L170">       menuFile = new JMenu(&quot;File&quot;);</span>
+<span class="nc" id="L171">       menuEdit = new JMenu(&quot;Edit&quot;);</span>
+<span class="nc" id="L172">       menuFind = new JMenu(&quot;Search&quot;);</span>
+<span class="nc" id="L173">       menuAbout = new JMenu(&quot;About&quot;);</span>
+       //Font Settings menu
+
+       // Set the Items Menu
+<span class="nc" id="L177">       newFile = new JMenuItem(&quot;New&quot;, newIcon);</span>
+<span class="nc" id="L178">       openFile = new JMenuItem(&quot;Open&quot;, openIcon);</span>
+<span class="nc" id="L179">       saveFile = new JMenuItem(&quot;Save&quot;, saveIcon);</span>
+<span class="nc" id="L180">       close = new JMenuItem(&quot;Quit&quot;, closeIcon);</span>
+<span class="nc" id="L181">       clearFile = new JMenuItem(&quot;Clear&quot;, clearIcon);</span>
+<span class="nc" id="L182">       quickFind = new JMenuItem(&quot;Quick&quot;, searchIcon);</span>
+<span class="nc" id="L183">       aboutMe = new JMenuItem(&quot;About Me&quot;, aboutMeIcon);</span>
+<span class="nc" id="L184">       aboutSoftware = new JMenuItem(&quot;About Software&quot;, aboutIcon);</span>
+
+<span class="nc" id="L186">       menuBar = new JMenuBar();</span>
+<span class="nc" id="L187">       menuBar.add(menuFile);</span>
+<span class="nc" id="L188">       menuBar.add(menuEdit);</span>
+<span class="nc" id="L189">       menuBar.add(menuFind);</span>
+
+<span class="nc" id="L191">       menuBar.add(menuAbout);</span>
+
+<span class="nc" id="L193">       this.setJMenuBar(menuBar);</span>
+
+       // Set Actions:
+<span class="nc" id="L196">       selectAllAction = new SelectAllAction(&quot;Select All&quot;, clearIcon, &quot;Select all text&quot;, new Integer(KeyEvent.VK_A),</span>
+               textArea);
+
+<span class="nc" id="L199">       this.setJMenuBar(menuBar);</span>
+
+       // New File
+<span class="nc" id="L202">       newFile.addActionListener(this);  // Adding an action listener (so we know when it's been clicked).</span>
+<span class="nc" id="L203">       newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK)); // Set a keyboard shortcut</span>
+<span class="nc" id="L204">       menuFile.add(newFile); // Adding the file menu</span>
+
+       // Open File
+<span class="nc" id="L207">       openFile.addActionListener(this);</span>
+<span class="nc" id="L208">       openFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L209">       menuFile.add(openFile);</span>
+
+       // Save File
+<span class="nc" id="L212">       saveFile.addActionListener(this);</span>
+<span class="nc" id="L213">       saveFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L214">       menuFile.add(saveFile);</span>
+
+       // Close File
+       /*
+        * Along with our &quot;CTRL+F4&quot; shortcut to close the window, we also have
+        * the default closer, as stated at the beginning of this tutorial. this
+        * means that we actually have TWO shortcuts to close:
+        * 1) the default close operation (example, Alt+F4 on Windows)
+        * 2) CTRL+F4, which we are
+        * about to define now: (this one will appear in the label).
+        */
+<span class="nc" id="L225">       close.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L226">       close.addActionListener(this);</span>
+<span class="nc" id="L227">       menuFile.add(close);</span>
+
+       // Select All Text
+<span class="nc" id="L230">       selectAll = new JMenuItem(selectAllAction);</span>
+<span class="nc" id="L231">       selectAll.setText(&quot;Select All&quot;);</span>
+<span class="nc" id="L232">       selectAll.setIcon(selectAllIcon);</span>
+<span class="nc" id="L233">       selectAll.setToolTipText(&quot;Select All&quot;);</span>
+<span class="nc" id="L234">       selectAll.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L235">       menuEdit.add(selectAll);</span>
+
+       // Clear File (Code)
+<span class="nc" id="L238">       clearFile.addActionListener(this);</span>
+<span class="nc" id="L239">       clearFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L240">       menuEdit.add(clearFile);</span>
+
+       // Cut Text
+<span class="nc" id="L243">       cut = new JMenuItem(new DefaultEditorKit.CutAction());</span>
+<span class="nc" id="L244">       cut.setText(&quot;Cut&quot;);</span>
+<span class="nc" id="L245">       cut.setIcon(cutIcon);</span>
+<span class="nc" id="L246">       cut.setToolTipText(&quot;Cut&quot;);</span>
+<span class="nc" id="L247">       cut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L248">       menuEdit.add(cut);</span>
+
+       // WordWrap
+<span class="nc" id="L251">       wordWrap = new JMenuItem();</span>
+<span class="nc" id="L252">       wordWrap.setText(&quot;Word Wrap&quot;);</span>
+<span class="nc" id="L253">       wordWrap.setIcon(wordwrapIcon);</span>
+<span class="nc" id="L254">       wordWrap.setToolTipText(&quot;Word Wrap&quot;);</span>
+
+       //Short cut key or key stroke
+<span class="nc" id="L257">       wordWrap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L258">       menuEdit.add(wordWrap);</span>
+
+       /* CODE FOR WORD WRAP OPERATION
+        * BY DEFAULT WORD WRAPPING IS ENABLED.
+        */
+<span class="nc" id="L263">       wordWrap.addActionListener(new ActionListener() {</span>
+           public void actionPerformed(ActionEvent ev) {
+               // If wrapping is false then after clicking on menuitem the word wrapping will be enabled
+               /* Setting word wrapping to true */
+               // else  if wrapping is true then after clicking on menuitem the word wrapping will be disabled
+               /* Setting word wrapping to false */
+<span class="nc bnc" id="L269" title="All 2 branches missed.">               textArea.setLineWrap(!textArea.getLineWrap());</span>
+<span class="nc" id="L270">           }</span>
+       });
+
+       // Copy Text
+<span class="nc" id="L274">       copy = new JMenuItem(new DefaultEditorKit.CopyAction());</span>
+<span class="nc" id="L275">       copy.setText(&quot;Copy&quot;);</span>
+<span class="nc" id="L276">       copy.setIcon(copyIcon);</span>
+<span class="nc" id="L277">       copy.setToolTipText(&quot;Copy&quot;);</span>
+<span class="nc" id="L278">       copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L279">       menuEdit.add(copy);</span>
+
+       // Paste Text
+<span class="nc" id="L282">       paste = new JMenuItem(new DefaultEditorKit.PasteAction());</span>
+<span class="nc" id="L283">       paste.setText(&quot;Paste&quot;);</span>
+<span class="nc" id="L284">       paste.setIcon(pasteIcon);</span>
+<span class="nc" id="L285">       paste.setToolTipText(&quot;Paste&quot;);</span>
+<span class="nc" id="L286">       paste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L287">       menuEdit.add(paste);</span>
+
+       // Find Word
+<span class="nc" id="L290">       quickFind.addActionListener(this);</span>
+<span class="nc" id="L291">       quickFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L292">       menuFind.add(quickFind);</span>
+
+       // About Me
+<span class="nc" id="L295">       aboutMe.addActionListener(this);</span>
+<span class="nc" id="L296">       aboutMe.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));</span>
+<span class="nc" id="L297">       menuAbout.add(aboutMe);</span>
+
+       // About Software
+<span class="nc" id="L300">       aboutSoftware.addActionListener(this);</span>
+<span class="nc" id="L301">       aboutSoftware.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));</span>
+<span class="nc" id="L302">       menuAbout.add(aboutSoftware);</span>
+
+<span class="nc" id="L304">       mainToolbar = new JToolBar();</span>
+<span class="nc" id="L305">       this.add(mainToolbar, BorderLayout.NORTH);</span>
+       // used to create space between button groups
+<span class="nc" id="L307">       newButton = new JButton(newIcon);</span>
+<span class="nc" id="L308">       newButton.setToolTipText(&quot;New&quot;);</span>
+<span class="nc" id="L309">       newButton.addActionListener(this);</span>
+<span class="nc" id="L310">       mainToolbar.add(newButton);</span>
+<span class="nc" id="L311">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L313">       openButton = new JButton(openIcon);</span>
+<span class="nc" id="L314">       openButton.setToolTipText(&quot;Open&quot;);</span>
+<span class="nc" id="L315">       openButton.addActionListener(this);</span>
+<span class="nc" id="L316">       mainToolbar.add(openButton);</span>
+<span class="nc" id="L317">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L319">       saveButton = new JButton(saveIcon);</span>
+<span class="nc" id="L320">       saveButton.setToolTipText(&quot;Save&quot;);</span>
+<span class="nc" id="L321">       saveButton.addActionListener(this);</span>
+<span class="nc" id="L322">       mainToolbar.add(saveButton);</span>
+<span class="nc" id="L323">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L325">       clearButton = new JButton(clearIcon);</span>
+<span class="nc" id="L326">       clearButton.setToolTipText(&quot;Clear All&quot;);</span>
+<span class="nc" id="L327">       clearButton.addActionListener(this);</span>
+<span class="nc" id="L328">       mainToolbar.add(clearButton);</span>
+<span class="nc" id="L329">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L331">       quickButton = new JButton(searchIcon);</span>
+<span class="nc" id="L332">       quickButton.setToolTipText(&quot;Quick Search&quot;);</span>
+<span class="nc" id="L333">       quickButton.addActionListener(this);</span>
+<span class="nc" id="L334">       mainToolbar.add(quickButton);</span>
+<span class="nc" id="L335">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L337">       aboutMeButton = new JButton(aboutMeIcon);</span>
+<span class="nc" id="L338">       aboutMeButton.setToolTipText(&quot;About Me&quot;);</span>
+<span class="nc" id="L339">       aboutMeButton.addActionListener(this);</span>
+<span class="nc" id="L340">       mainToolbar.add(aboutMeButton);</span>
+<span class="nc" id="L341">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L343">       aboutButton = new JButton(aboutIcon);</span>
+<span class="nc" id="L344">       aboutButton.setToolTipText(&quot;About NotePad PH&quot;);</span>
+<span class="nc" id="L345">       aboutButton.addActionListener(this);</span>
+<span class="nc" id="L346">       mainToolbar.add(aboutButton);</span>
+<span class="nc" id="L347">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L349">       closeButton = new JButton(closeIcon);</span>
+<span class="nc" id="L350">       closeButton.setToolTipText(&quot;Quit&quot;);</span>
+<span class="nc" id="L351">       closeButton.addActionListener(this);</span>
+<span class="nc" id="L352">       mainToolbar.add(closeButton);</span>
+<span class="nc" id="L353">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L355">       boldButton = new JButton(boldIcon);</span>
+<span class="nc" id="L356">       boldButton.setToolTipText(&quot;Bold&quot;);</span>
+<span class="nc" id="L357">       boldButton.addActionListener(this);</span>
+<span class="nc" id="L358">       mainToolbar.add(boldButton);</span>
+<span class="nc" id="L359">       mainToolbar.addSeparator();</span>
+
+<span class="nc" id="L361">       italicButton = new JButton(italicIcon);</span>
+<span class="nc" id="L362">       italicButton.setToolTipText(&quot;Italic&quot;);</span>
+<span class="nc" id="L363">       italicButton.addActionListener(this);</span>
+<span class="nc" id="L364">       mainToolbar.add(italicButton);</span>
+<span class="nc" id="L365">       mainToolbar.addSeparator();</span>
+       /**
+        * **************** FONT SETTINGS SECTION **********************
+        */
+       //FONT FAMILY SETTINGS SECTION START
+<span class="nc" id="L370">       fontType = new JComboBox&lt;String&gt;();</span>
+
+       //GETTING ALL AVAILABLE FONT FOMILY NAMES
+<span class="nc" id="L373">       String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();</span>
+
+<span class="nc bnc" id="L375" title="All 2 branches missed.">       for (String font : fonts) {</span>
+           //Adding font family names to font[] array
+<span class="nc" id="L377">           fontType.addItem(font);</span>
+       }
+       //Setting maximize size of the fontType ComboBox
+<span class="nc" id="L380">       fontType.setMaximumSize(new Dimension(170, 30));</span>
+<span class="nc" id="L381">       fontType.setToolTipText(&quot;Font Type&quot;);</span>
+<span class="nc" id="L382">       mainToolbar.add(fontType);</span>
+<span class="nc" id="L383">       mainToolbar.addSeparator();</span>
+
+       //Adding Action Listener on fontType JComboBox
+<span class="nc" id="L386">       fontType.addActionListener(new ActionListener() {</span>
+           public void actionPerformed(ActionEvent ev) {
+               //Getting the selected fontType value from ComboBox
+<span class="nc" id="L389">               String p = fontType.getSelectedItem().toString();</span>
+               //Getting size of the current font or text
+<span class="nc" id="L391">               int s = textArea.getFont().getSize();</span>
+<span class="nc" id="L392">               textArea.setFont(new Font(p, Font.PLAIN, s));</span>
+<span class="nc" id="L393">           }</span>
+       });
+
+       //FONT FAMILY SETTINGS SECTION END
+       //FONT SIZE SETTINGS START
+<span class="nc" id="L398">       fontSize = new JComboBox&lt;Integer&gt;();</span>
+
+<span class="nc bnc" id="L400" title="All 2 branches missed.">       for (int i = 5; i &lt;= 100; i++) {</span>
+<span class="nc" id="L401">           fontSize.addItem(i);</span>
+       }
+<span class="nc" id="L403">       fontSize.setMaximumSize(new Dimension(70, 30));</span>
+<span class="nc" id="L404">       fontSize.setToolTipText(&quot;Font Size&quot;);</span>
+<span class="nc" id="L405">       mainToolbar.add(fontSize);</span>
+
+<span class="nc" id="L407">       fontSize.addActionListener(new ActionListener() {</span>
+           public void actionPerformed(ActionEvent ev) {
+<span class="nc" id="L409">               String sizeValue = fontSize.getSelectedItem().toString();</span>
+<span class="nc" id="L410">               int sizeOfFont = Integer.parseInt(sizeValue);</span>
+<span class="nc" id="L411">               String fontFamily = textArea.getFont().getFamily();</span>
+
+<span class="nc" id="L413">               Font font1 = new Font(fontFamily, Font.PLAIN, sizeOfFont);</span>
+<span class="nc" id="L414">               textArea.setFont(font1);</span>
+<span class="nc" id="L415">           }</span>
+       });
+       //FONT SIZE SETTINGS SECTION END
+<span class="nc" id="L418">   }</span>
+
+   @Override
+   protected void processWindowEvent(WindowEvent e) {
+<span class="nc bnc" id="L422" title="All 2 branches missed.">       if (e.getID() == WindowEvent.WINDOW_CLOSING) {</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">           if (edit) {</span>
+<span class="nc" id="L424">               Object[] options = {&quot;Save and exit&quot;, &quot;No Save and exit&quot;, &quot;Return&quot;};</span>
+<span class="nc" id="L425">               int n = JOptionPane.showOptionDialog(this, &quot;Do you want to save the file ?&quot;, &quot;Question&quot;,</span>
+                       JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+<span class="nc bnc" id="L427" title="All 2 branches missed.">               if (n == 0) {// save and exit</span>
+<span class="nc" id="L428">                   saveFile();</span>
+<span class="nc" id="L429">                   this.dispose();// dispose all resources and close the application</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">               } else if (n == 1) {// no save and exit</span>
+<span class="nc" id="L431">                   this.dispose();// dispose all resources and close the application</span>
+               }
+<span class="nc" id="L433">           } else {</span>
+<span class="nc" id="L434">               System.exit(99);</span>
+           }
+       }
+<span class="nc" id="L437">   }</span>
+
+   // Make the TextArea available to the autocomplete handler
+   protected JTextArea getEditor() {
+<span class="nc" id="L441">       return textArea;</span>
+   }
+
+   // Enable autocomplete option
+   public void enableAutoComplete(File file) {
+<span class="nc bnc" id="L446" title="All 2 branches missed.">       if (hasListener) {</span>
+<span class="nc" id="L447">           textArea.getDocument().removeDocumentListener(autocomplete);</span>
+<span class="nc" id="L448">           hasListener = false;</span>
+       }
+
+       ArrayList&lt;String&gt; arrayList;
+<span class="nc" id="L452">       String[] list = kw.getSupportedLanguages();</span>
+
+<span class="nc bnc" id="L454" title="All 2 branches missed.">       for (int i = 0; i &lt; list.length; i++) {</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">           if (file.getName().endsWith(list[i])) {</span>
+<span class="nc bnc" id="L456" title="All 3 branches missed.">               switch (i) {</span>
+                   case 0 -&gt; {
+<span class="nc" id="L458">                       String[] jk = kw.getJavaKeywords();</span>
+<span class="nc" id="L459">                       arrayList = kw.setKeywords(jk);</span>
+<span class="nc" id="L460">                       autocomplete = new AutoComplete(this, arrayList);</span>
+<span class="nc" id="L461">                       textArea.getDocument().addDocumentListener(autocomplete);</span>
+<span class="nc" id="L462">                       hasListener = true;</span>
+<span class="nc" id="L463">                   }</span>
+                   case 1 -&gt; {
+<span class="nc" id="L465">                       String[] ck = kw.getCppKeywords();</span>
+<span class="nc" id="L466">                       arrayList = kw.setKeywords(ck);</span>
+<span class="nc" id="L467">                       autocomplete = new AutoComplete(this, arrayList);</span>
+<span class="nc" id="L468">                       textArea.getDocument().addDocumentListener(autocomplete);</span>
+<span class="nc" id="L469">                       hasListener = true;</span>
+                   }
+               }
+           }
+       }
+<span class="nc" id="L474">   }</span>
+
+   public void actionPerformed(ActionEvent e) {
+       // If the source of the event was our &quot;close&quot; option
+<span class="nc bnc" id="L478" title="All 4 branches missed.">       if (e.getSource() == close || e.getSource() == closeButton) {</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">           if (edit) {</span>
+<span class="nc" id="L480">               Object[] options = {&quot;Save and exit&quot;, &quot;No Save and exit&quot;, &quot;Return&quot;};</span>
+<span class="nc" id="L481">               int n = JOptionPane.showOptionDialog(this, &quot;Do you want to save the file ?&quot;, &quot;Question&quot;,</span>
+                       JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+<span class="nc bnc" id="L483" title="All 2 branches missed.">               if (n == 0) {// save and exit</span>
+<span class="nc" id="L484">                   saveFile();</span>
+<span class="nc" id="L485">                   this.dispose();// dispose all resources and close the application</span>
+<span class="nc bnc" id="L486" title="All 2 branches missed.">               } else if (n == 1) {// no save and exit</span>
+<span class="nc" id="L487">                   this.dispose();// dispose all resources and close the application</span>
+               }
+<span class="nc" id="L489">           } else {</span>
+<span class="nc" id="L490">               this.dispose();// dispose all resources and close the application</span>
+           }
+       } // If the source was the &quot;new&quot; file option
+<span class="nc bnc" id="L493" title="All 4 branches missed.">       else if (e.getSource() == newFile || e.getSource() == newButton) {</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">           if (edit) {</span>
+<span class="nc" id="L495">               Object[] options = {&quot;Save&quot;, &quot;No Save&quot;, &quot;Return&quot;};</span>
+<span class="nc" id="L496">               int n = JOptionPane.showOptionDialog(this, &quot;Do you want to save the file at first ?&quot;, &quot;Question&quot;,</span>
+                       JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+<span class="nc bnc" id="L498" title="All 2 branches missed.">               if (n == 0) {// save</span>
+<span class="nc" id="L499">                   saveFile();</span>
+<span class="nc" id="L500">                   edit = false;</span>
+<span class="nc bnc" id="L501" title="All 2 branches missed.">               } else if (n == 1) {</span>
+<span class="nc" id="L502">                   edit = false;</span>
+<span class="nc" id="L503">                   FEdit.clear(textArea);</span>
+               }
+<span class="nc" id="L505">           } else {</span>
+<span class="nc" id="L506">               FEdit.clear(textArea);</span>
+           }
+
+       } // If the source was the &quot;open&quot; option
+<span class="nc bnc" id="L510" title="All 4 branches missed.">       else if (e.getSource() == openFile || e.getSource() == openButton) {</span>
+<span class="nc" id="L511">           JFileChooser open = new JFileChooser(); // open up a file chooser (a dialog for the user to  browse files to open)</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">           if( !(textArea.getText().equals(&quot;&quot;)) ) {</span>
+<span class="nc" id="L513">               saveFile();</span>
+           }
+           // if true does normal operation
+<span class="nc" id="L516">           int option = open.showOpenDialog(this); // get the option that the user selected (approve or cancel)</span>
+
+           /*
+           * NOTE: because we are OPENing a file, we call showOpenDialog~ if
+           * the user clicked OK, we have &quot;APPROVE_OPTION&quot; so we want to open
+           * the file
+           */
+<span class="nc bnc" id="L523" title="All 2 branches missed.">           if (option == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L524">               FEdit.clear(textArea); // clear the TextArea before applying the file contents</span>
+               try {
+<span class="nc" id="L526">                   File openFile = open.getSelectedFile();</span>
+<span class="nc" id="L527">                   setTitle(openFile.getName() + &quot; | &quot; + SimpleJavaTextEditor.NAME);</span>
+<span class="nc" id="L528">                   Scanner scan = new Scanner(new FileReader(openFile.getPath()));</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                   while (scan.hasNext()) {</span>
+<span class="nc" id="L530">                       textArea.append(scan.nextLine() + &quot;\n&quot;);</span>
+                   }
+
+<span class="nc" id="L533">                   enableAutoComplete(openFile);</span>
+<span class="nc" id="L534">               } catch (Exception ex) { // catch any exceptions, and...</span>
+                   // ...write to the debug console
+<span class="nc" id="L536">                   System.err.println(ex.getMessage());</span>
+<span class="nc" id="L537">               }</span>
+           }
+
+<span class="nc" id="L540">       } // If the source of the event was the &quot;save&quot; option</span>
+<span class="nc bnc" id="L541" title="All 4 branches missed.">       else if (e.getSource() == saveFile || e.getSource() == saveButton) {</span>
+<span class="nc" id="L542">           saveFile();</span>
+       }// If the source of the event was the &quot;Bold&quot; button
+<span class="nc bnc" id="L544" title="All 2 branches missed.">       else if (e.getSource() == boldButton) {</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">           if (textArea.getFont().getStyle() == Font.BOLD) {</span>
+<span class="nc" id="L546">               textArea.setFont(textArea.getFont().deriveFont(Font.PLAIN));</span>
+           } else {
+<span class="nc" id="L548">               textArea.setFont(textArea.getFont().deriveFont(Font.BOLD));</span>
+           }
+       }// If the source of the event was the &quot;Italic&quot; button
+<span class="nc bnc" id="L551" title="All 2 branches missed.">       else if (e.getSource() == italicButton) {</span>
+<span class="nc bnc" id="L552" title="All 2 branches missed.">           if (textArea.getFont().getStyle() == Font.ITALIC) {</span>
+<span class="nc" id="L553">               textArea.setFont(textArea.getFont().deriveFont(Font.PLAIN));</span>
+           } else {
+<span class="nc" id="L555">               textArea.setFont(textArea.getFont().deriveFont(Font.ITALIC));</span>
+           }
+       }
+       // Clear File (Code)
+<span class="nc bnc" id="L559" title="All 4 branches missed.">       if (e.getSource() == clearFile || e.getSource() == clearButton) {</span>
+
+<span class="nc" id="L561">           Object[] options = {&quot;Yes&quot;, &quot;No&quot;};</span>
+<span class="nc" id="L562">           int n = JOptionPane.showOptionDialog(this, &quot;Are you sure to clear the text Area ?&quot;, &quot;Question&quot;,</span>
+                   JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+<span class="nc bnc" id="L564" title="All 2 branches missed.">           if (n == 0) {// clear</span>
+<span class="nc" id="L565">               FEdit.clear(textArea);</span>
+           }
+       }
+       // Find
+<span class="nc bnc" id="L569" title="All 4 branches missed.">       if (e.getSource() == quickFind || e.getSource() == quickButton) {</span>
+<span class="nc" id="L570">           new Find(textArea);</span>
+       } // About Me
+<span class="nc bnc" id="L572" title="All 4 branches missed.">       else if (e.getSource() == aboutMe || e.getSource() == aboutMeButton) {</span>
+<span class="nc" id="L573">           new About(this).me();</span>
+       } // About Software
+<span class="nc bnc" id="L575" title="All 4 branches missed.">       else if (e.getSource() == aboutSoftware || e.getSource() == aboutButton) {</span>
+<span class="nc" id="L576">           new About(this).software();</span>
+       }
+<span class="nc" id="L578">   }</span>
+
+   class SelectAllAction extends AbstractAction {
+
+       /**
+        * Used for Select All function
+        */
+       private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L587">       public SelectAllAction(String text, ImageIcon icon, String desc, Integer mnemonic, final JTextArea textArea) {</span>
+<span class="nc" id="L588">           super(text, icon);</span>
+<span class="nc" id="L589">           putValue(SHORT_DESCRIPTION, desc);</span>
+<span class="nc" id="L590">           putValue(MNEMONIC_KEY, mnemonic);</span>
+<span class="nc" id="L591">       }</span>
+
+       public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L594">           textArea.selectAll();</span>
+<span class="nc" id="L595">       }</span>
+   }
+
+   private void saveFile() {
+       // Open a file chooser
+<span class="nc" id="L600">       JFileChooser fileChoose = new JFileChooser();</span>
+       // Open the file, only this time we call
+<span class="nc" id="L602">       int option = fileChoose.showSaveDialog(this);</span>
+
+       /*
+            * ShowSaveDialog instead of showOpenDialog if the user clicked OK
+            * (and not cancel)
+        */
+<span class="nc bnc" id="L608" title="All 2 branches missed.">       if (option == JFileChooser.APPROVE_OPTION) {</span>
+           try {
+<span class="nc" id="L610">               File openFile = fileChoose.getSelectedFile();</span>
+<span class="nc" id="L611">               setTitle(openFile.getName() + &quot; | &quot; + SimpleJavaTextEditor.NAME);</span>
+
+<span class="nc" id="L613">               BufferedWriter out = new BufferedWriter(new FileWriter(openFile.getPath()));</span>
+<span class="nc" id="L614">               out.write(textArea.getText());</span>
+<span class="nc" id="L615">               out.close();</span>
+
+<span class="nc" id="L617">               enableAutoComplete(openFile);</span>
+<span class="nc" id="L618">               edit = false;</span>
+<span class="nc" id="L619">           } catch (Exception ex) { // again, catch any exceptions and...</span>
+               // ...write to the debug console
+<span class="nc" id="L621">               System.err.println(ex.getMessage());</span>
+<span class="nc" id="L622">           }</span>
+       }
+<span class="nc" id="L624">   }</span>
+<span class="nc" id="L625">   DropTargetListener dropTargetListener = new DropTargetListener() {</span>
+
+       @Override
+       public void dragEnter(DropTargetDragEvent e) {
+<span class="nc" id="L629">       }</span>
+
+       @Override
+       public void dragExit(DropTargetEvent e) {
+<span class="nc" id="L633">       }</span>
+
+       @Override
+       public void dragOver(DropTargetDragEvent e) {
+<span class="nc" id="L637">       }</span>
+
+       @Override
+       public void drop(DropTargetDropEvent e) {
+<span class="nc bnc" id="L641" title="All 2 branches missed.">           if (edit) {</span>
+<span class="nc" id="L642">               Object[] options = {&quot;Save&quot;, &quot;No Save&quot;, &quot;Return&quot;};</span>
+<span class="nc" id="L643">               int n = JOptionPane.showOptionDialog(UI.this, &quot;Do you want to save the file at first ?&quot;, &quot;Question&quot;,</span>
+                       JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+<span class="nc bnc" id="L645" title="All 2 branches missed.">               if (n == 0) {// save</span>
+<span class="nc" id="L646">                   UI.this.saveFile();</span>
+<span class="nc" id="L647">                   edit = false;</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">               } else if (n == 1) {</span>
+<span class="nc" id="L649">                   edit = false;</span>
+<span class="nc" id="L650">                   FEdit.clear(textArea);</span>
+<span class="nc bnc" id="L651" title="All 2 branches missed.">               } else if (n == 2) {</span>
+<span class="nc" id="L652">                   e.rejectDrop();</span>
+<span class="nc" id="L653">                   return;</span>
+               }
+           }
+           try {
+<span class="nc" id="L657">               Transferable tr = e.getTransferable();</span>
+<span class="nc" id="L658">               DataFlavor[] flavors = tr.getTransferDataFlavors();</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">               for (DataFlavor flavor : flavors) {</span>
+<span class="nc bnc" id="L660" title="All 2 branches missed.">                   if (flavor.isFlavorJavaFileListType()) {</span>
+<span class="nc" id="L661">                       e.acceptDrop(e.getDropAction());</span>
+
+                       try {
+<span class="nc" id="L664">                           String fileName = tr.getTransferData(flavor).toString().replace(&quot;[&quot;, &quot;&quot;).replace(&quot;]&quot;, &quot;&quot;);</span>
+
+                           // Allowed file filter extentions for drag and drop
+<span class="nc" id="L667">                           boolean extensionAllowed = false;</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">                           for (String s : dragDropExtensionFilter) {</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">                               if (fileName.endsWith(s)) {</span>
+<span class="nc" id="L670">                                   extensionAllowed = true;</span>
+<span class="nc" id="L671">                                   break;</span>
+                               }
+                           }
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                           if (!extensionAllowed) {</span>
+<span class="nc" id="L675">                               JOptionPane.showMessageDialog(UI.this, &quot;This file is not allowed for drag &amp; drop&quot;, &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+
+                           } else {
+<span class="nc" id="L678">                               FileInputStream fis = new FileInputStream(new File(fileName));</span>
+<span class="nc" id="L679">                               byte[] ba = new byte[fis.available()];</span>
+<span class="nc" id="L680">                               fis.read(ba);</span>
+<span class="nc" id="L681">                               textArea.setText(new String(ba));</span>
+<span class="nc" id="L682">                               fis.close();</span>
+                           }
+<span class="nc" id="L684">                       } catch (Exception ex) {</span>
+<span class="nc" id="L685">                           ex.printStackTrace();</span>
+<span class="nc" id="L686">                       }</span>
+<span class="nc" id="L687">                       e.dropComplete(true);</span>
+<span class="nc" id="L688">                       return;</span>
+                   }
+               }
+<span class="nc" id="L691">           } catch (Throwable t) {</span>
+<span class="nc" id="L692">               t.printStackTrace();</span>
+<span class="nc" id="L693">           }</span>
+<span class="nc" id="L694">           e.rejectDrop();</span>
+<span class="nc" id="L695">       }</span>
+
+       @Override
+       public void dropActionChanged(DropTargetDragEvent e) {
+<span class="nc" id="L699">       }</span>
+   };
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutoComplete.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec, jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">AutoComplete.java</span></div><h1>AutoComplete.java</h1><pre class="source lang-java linenums">
+package SimpleJavaTextEditor;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+
+/**
+ * &lt;h1&gt;Auto complete functionality multiple programming languages, including brackets and
+ * parentheses&lt;/h1&gt;
+ *
+ * &lt;p&gt;
+ * An ArrayList is created for the keywords and the brackets.
+ * Logic for setting the content of the ArrayList is
+ * found in UI.java. If the word currently being typed
+ * matches a word in the list, a Runnable inner class is
+ * implemented to handle the word completion.
+ *
+ * Two other inner classes are also used. The second one handles when the enter
+ * key is pressed in response to an auto complete suggestion. The third one
+ * performs additional logic on brackets.
+ * &lt;/p&gt;
+ *
+ *
+ * @author Patrick Slagle
+ * @since 2016-12-03
+ */
+public class AutoComplete
+        implements DocumentListener {
+
+<span class="nc" id="L42">    private ArrayList&lt;String&gt; brackets = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L43">    private ArrayList&lt;String&gt; bracketCompletions = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L45">    private ArrayList&lt;String&gt; words = new ArrayList&lt;&gt;();</span>
+
+    SupportedKeywords kw;
+
+    //Keep track of when code completion
+    //has been activated
+<span class="nc" id="L51">    private enum Mode {</span>
+<span class="nc" id="L52">        INSERT, COMPLETION</span>
+    };
+
+    private final UI ui;
+<span class="nc" id="L56">    private Mode mode = Mode.INSERT;</span>
+    private final JTextArea textArea;
+    private static final String COMMIT_ACTION = &quot;commit&quot;;
+    private boolean isKeyword;
+    private int pos;
+    private String content;
+
+<span class="nc" id="L63">    public AutoComplete(UI ui, ArrayList&lt;String&gt; al) {</span>
+        //Set the keywords
+<span class="nc" id="L65">        words = al;</span>
+<span class="nc" id="L66">        kw = new SupportedKeywords();</span>
+<span class="nc" id="L67">        brackets = kw.getBrackets();</span>
+<span class="nc" id="L68">        bracketCompletions = kw.getBracketCompletions();</span>
+
+        //Access the editor
+<span class="nc" id="L71">        this.ui = ui;</span>
+<span class="nc" id="L72">        textArea = ui.getEditor();</span>
+
+        //Set the handler for the enter key
+<span class="nc" id="L75">        InputMap im = textArea.getInputMap();</span>
+<span class="nc" id="L76">        ActionMap am = textArea.getActionMap();</span>
+<span class="nc" id="L77">        im.put(KeyStroke.getKeyStroke(&quot;ENTER &quot;), COMMIT_ACTION);</span>
+<span class="nc" id="L78">        am.put(COMMIT_ACTION, new CommitAction());</span>
+
+<span class="nc" id="L80">        Collections.sort(words);</span>
+<span class="nc" id="L81">    }</span>
+
+    /**
+     * A character has been typed into the document.
+     * This method performs the primary
+     * check to find a keyword completion.
+     *
+     * @param e
+     */
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+<span class="nc" id="L92">        pos = e.getOffset();</span>
+<span class="nc" id="L93">        content = null;</span>
+
+        try {
+<span class="nc" id="L96">            content = textArea.getText(0, pos + 1);</span>
+<span class="nc" id="L97">        } catch (BadLocationException ex) {</span>
+<span class="nc" id="L98">            ex.printStackTrace();</span>
+<span class="nc" id="L99">        }</span>
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (e.getLength() != 1) {</span>
+<span class="nc" id="L102">            return;</span>
+        }
+
+        //Before checking for a keyword
+<span class="nc" id="L106">        checkForBracket();</span>
+
+        //Get the beginning of the word being typed
+        int start;
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        for (start = pos; start &gt;= 0; start--) {</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if (!Character.isLetter(content.charAt(start))) {</span>
+<span class="nc" id="L112">                break;</span>
+            }
+        }
+
+        //Auto complete will start
+        //after two characters are typed
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (pos - start &lt; 2) {</span>
+<span class="nc" id="L119">            return;</span>
+        }
+
+        //Search for a match on the word being typed
+        //in the keywords ArrayList
+<span class="nc" id="L124">        String prefix = content.substring(start + 1);</span>
+<span class="nc" id="L125">        int n = Collections.binarySearch(words, prefix);</span>
+
+<span class="nc bnc" id="L127" title="All 4 branches missed.">        if (n &lt; 0 &amp;&amp; -n &lt; words.size()) {</span>
+<span class="nc" id="L128">            String match = words.get(-n - 1);</span>
+
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (match.startsWith(prefix)) {</span>
+<span class="nc" id="L131">                String completion = match.substring(pos - start);</span>
+<span class="nc" id="L132">                isKeyword = true;</span>
+<span class="nc" id="L133">                SwingUtilities.invokeLater(</span>
+                        new CompletionTask(completion, pos + 1));
+<span class="nc" id="L135">            } else {</span>
+<span class="nc" id="L136">                mode = Mode.INSERT;</span>
+            }
+        }
+<span class="nc" id="L139">    }</span>
+
+    /**
+     * Performs a check to see if the last
+     * key typed was one of the supported
+     * bracket characters
+     */
+    private void checkForBracket() {
+        //String of the last typed character
+<span class="nc" id="L148">        char c = content.charAt(pos);</span>
+<span class="nc" id="L149">        String s = String.valueOf(c);</span>
+
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        for (int i = 0; i &lt; brackets.size(); i++) {</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (brackets.get(i).equals(s)) {</span>
+<span class="nc" id="L153">                isKeyword = false;</span>
+<span class="nc" id="L154">                SwingUtilities.invokeLater(</span>
+<span class="nc" id="L155">                        new CompletionTask(bracketCompletions.get(i), pos + 1));</span>
+            }
+        }
+<span class="nc" id="L158">    }</span>
+
+    /**
+     * So that future classes can view the keyword list in the future.
+     *
+     * @return the keywords
+     */
+    private ArrayList&lt;String&gt; getKeywords() {
+<span class="nc" id="L166">        return words;</span>
+    }
+
+    /**
+     * So that these keywords can be modified or added to in the future.
+     *
+     * @param keyword the keyword to set
+     */
+    private void setKeywords(String keyword) {
+<span class="nc" id="L175">        words.add(keyword);</span>
+<span class="nc" id="L176">    }</span>
+
+    /**
+     * Handles the auto complete suggestion
+     * generated when the user is typing a
+     * word that matches a keyword.
+     */
+    private class CompletionTask
+            implements Runnable {
+
+        private final String completion;
+        private final int position;
+
+<span class="nc" id="L189">        public CompletionTask(String completion, int position) {</span>
+<span class="nc" id="L190">            this.completion = completion;</span>
+<span class="nc" id="L191">            this.position = position;</span>
+<span class="nc" id="L192">        }</span>
+
+        @Override
+        public void run() {
+<span class="nc" id="L196">            textArea.insert(completion, position);</span>
+
+<span class="nc" id="L198">            textArea.setCaretPosition(position + completion.length());</span>
+<span class="nc" id="L199">            textArea.moveCaretPosition(position);</span>
+<span class="nc" id="L200">            mode = Mode.COMPLETION;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            if (!isKeyword) {</span>
+<span class="nc" id="L202">                textArea.addKeyListener(new HandleBracketEvent());</span>
+            }
+<span class="nc" id="L204">        }</span>
+    }
+
+    /**
+     * Enter key is pressed in response to an
+     * auto complete suggestion. Respond
+     * appropriately.
+     */
+<span class="nc" id="L212">    private class CommitAction</span>
+            extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            if (mode == Mode.COMPLETION) {</span>
+<span class="nc" id="L219">                int pos = textArea.getSelectionEnd();</span>
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                if (isKeyword) {</span>
+<span class="nc" id="L222">                    textArea.insert(&quot; &quot;, pos);</span>
+<span class="nc" id="L223">                    textArea.setCaretPosition(pos + 1);</span>
+<span class="nc" id="L224">                    mode = Mode.INSERT;</span>
+                }
+<span class="nc" id="L226">            } else {</span>
+<span class="nc" id="L227">                mode = Mode.INSERT;</span>
+<span class="nc" id="L228">                textArea.replaceSelection(&quot;\n&quot;);</span>
+            }
+<span class="nc" id="L230">        }</span>
+    }
+
+    /**
+     * Additional logic for bracket auto complete
+     */
+<span class="nc" id="L236">    private class HandleBracketEvent</span>
+            implements KeyListener {
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            //Bracket auto complete needs special attention.
+            //Multiple possible responses are needed.
+<span class="nc" id="L243">            String keyEvent = String.valueOf(e.getKeyChar());</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">            for (String bracketCompletion : bracketCompletions) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                if (keyEvent.equals(bracketCompletion)) {</span>
+<span class="nc" id="L246">                    textArea.replaceRange(&quot;&quot;, pos, pos + 1);</span>
+<span class="nc" id="L247">                    mode = Mode.INSERT;</span>
+<span class="nc" id="L248">                    textArea.removeKeyListener(this);</span>
+                }
+<span class="nc" id="L250">            }</span>
+<span class="nc" id="L251">            int currentPosition = textArea.getCaretPosition();</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">            switch (e.getKeyChar()) {</span>
+                case '\n':
+<span class="nc" id="L254">                    textArea.insert(&quot;\n\n&quot;, currentPosition);</span>
+<span class="nc" id="L255">                    textArea.setCaretPosition(currentPosition + 1);</span>
+<span class="nc" id="L256">                    mode = Mode.INSERT;</span>
+<span class="nc" id="L257">                    textArea.removeKeyListener(this);</span>
+<span class="nc" id="L258">                    break;</span>
+                default:
+<span class="nc" id="L260">                    textArea.setCaretPosition(pos);</span>
+<span class="nc" id="L261">                    mode = Mode.INSERT;</span>
+<span class="nc" id="L262">                    textArea.removeKeyListener(this);</span>
+                    break;
+            }
+<span class="nc" id="L265">        }</span>
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+<span class="nc" id="L269">        }</span>
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+<span class="nc" id="L273">        }</span>
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+<span class="nc" id="L278">    }</span>
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+<span class="nc" id="L282">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

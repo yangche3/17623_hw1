@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HighlightTextTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">HighlightTextTest.java</span></div><h1>HighlightTextTest.java</h1><pre class="source lang-java linenums">package SimpleJavaTextEditor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import javax.swing.*;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
+
+
+import java.awt.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+
+<span class="nc" id="L14">public class HighlightTextTest {</span>
+    private HighlightText highlighter;
+    private JTextComponent textComp;
+
+    @BeforeEach
+    void setUp() {
+<span class="nc" id="L20">        textComp = new JTextArea();</span>
+<span class="nc" id="L21">        highlighter = new HighlightText(Color.GRAY);</span>
+<span class="nc" id="L22">        textComp.setText(&quot;The conclusion is clear: software engineering is difﬁcult, and so is software testing.&quot;);</span>
+<span class="nc" id="L23">    }</span>
+
+    // White-box tests
+    @Test
+    void testHighlightText() {
+<span class="nc" id="L28">        String[] patterns = {&quot;The&quot;,&quot;software&quot;};</span>
+<span class="nc" id="L29">        highlighter.highLight(textComp, patterns);</span>
+
+        // Check that the text component has highlights
+<span class="nc" id="L32">        Highlighter.Highlight[] highlights = textComp.getHighlighter().getHighlights();</span>
+<span class="nc" id="L33">        assertEquals(3, highlights.length);</span>
+
+        // Check the start and end offsets of each highlight
+<span class="nc" id="L36">        assertEquals(0, highlights[0].getStartOffset());</span>
+<span class="nc" id="L37">        assertEquals(3, highlights[0].getEndOffset());</span>
+
+<span class="nc" id="L39">        assertEquals(25, highlights[1].getStartOffset());</span>
+<span class="nc" id="L40">        assertEquals(33, highlights[1].getEndOffset());</span>
+
+<span class="nc" id="L42">        assertEquals(69, highlights[2].getStartOffset());</span>
+<span class="nc" id="L43">        assertEquals(77, highlights[2].getEndOffset());</span>
+
+<span class="nc" id="L45">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

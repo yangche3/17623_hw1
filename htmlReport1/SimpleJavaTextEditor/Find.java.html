@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Find.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">SimpleJavaTextEditor</a> &gt; <span class="el_source">Find.java</span></div><h1>Find.java</h1><pre class="source lang-java linenums">/**
+ * @name        Simple Java NotePad
+ * @package     ph.notepad
+ * @file        UI.java
+ * @author      SORIA Pierre-Henry
+ * @email       pierrehs@hotmail.com
+ * @link        http://github.com/pH-7
+ * @copyright   Copyright Pierre-Henry SORIA, All Rights Reserved.
+ * @license     Apache (http://www.apache.org/licenses/LICENSE-2.0)
+ * @create      2012-05-04
+ * @update      2015-09-4
+ *
+ *
+ * @modifiedby  Achintha Gunasekara
+ * @modweb      http://www.achinthagunasekara.com
+ * @modemail    contact@achinthagunasekara.com
+ *
+ * @Modifiedby SidaDan
+ * @modemail Fschultz@sinf.de
+ * Center this JFrame to the JTextArea
+ * Bug fixed. If JTextArea txt not empty and the user will
+ * shutdown the Simple Java NotePad, then the Simple Java NotePad
+ * is only hidden (still running). We need DISPOSE_ON_CLOSE for
+ * this JFrame.
+ * Tested with java 8.
+ *
+ * @Modifiedby SidaDan
+ * @modemail Fschultz@sinf.de
+ * Removed unsused imports
+ */
+
+package SimpleJavaTextEditor;
+
+import javax.swing.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class Find extends JFrame implements ActionListener {
+
+    private static final long serialVersionUID = 1L;
+<span class="fc" id="L41">    int startIndex=0;</span>
+<span class="fc" id="L42">    int select_start=-1;</span>
+    JLabel lab1, lab2;
+    JTextField textF, textR;
+    JButton findBtn, findNext, replace, replaceAll, cancel;
+    private JTextArea txt;
+
+<span class="fc" id="L48">    public Find(JTextArea text) {</span>
+<span class="fc" id="L49">        this.txt = text;</span>
+
+<span class="fc" id="L51">        lab1 = new JLabel(&quot;Find:&quot;);</span>
+<span class="fc" id="L52">        lab2 = new JLabel(&quot;Replace:&quot;);</span>
+<span class="fc" id="L53">        textF = new JTextField(30);</span>
+<span class="fc" id="L54">        textR = new JTextField(30);</span>
+<span class="fc" id="L55">        findBtn = new JButton(&quot;Find&quot;);</span>
+<span class="fc" id="L56">        findNext = new JButton(&quot;Find Next&quot;);</span>
+<span class="fc" id="L57">        replace = new JButton(&quot;Replace&quot;);</span>
+<span class="fc" id="L58">        replaceAll = new JButton(&quot;Replace All&quot;);</span>
+<span class="fc" id="L59">        cancel = new JButton(&quot;Cancel&quot;);</span>
+
+        // Set Layout NULL
+<span class="fc" id="L62">        setLayout(null);</span>
+
+        // Set the width and height of the label
+<span class="fc" id="L65">        int labWidth = 80;</span>
+<span class="fc" id="L66">        int labHeight = 20;</span>
+
+        // Adding labels
+<span class="fc" id="L69">        lab1.setBounds(10,10, labWidth, labHeight);</span>
+<span class="fc" id="L70">        add(lab1);</span>
+<span class="fc" id="L71">        textF.setBounds(10+labWidth, 10, 120, 20);</span>
+<span class="fc" id="L72">        add(textF);</span>
+<span class="fc" id="L73">        lab2.setBounds(10, 10+labHeight+10, labWidth, labHeight);</span>
+<span class="fc" id="L74">        add(lab2);</span>
+<span class="fc" id="L75">        textR.setBounds(10+labWidth, 10+labHeight+10, 120, 20);</span>
+<span class="fc" id="L76">        add(textR);</span>
+
+        // Adding buttons
+<span class="fc" id="L79">        findBtn.setBounds(225, 6, 115, 20);</span>
+<span class="fc" id="L80">        add(findBtn);</span>
+<span class="fc" id="L81">        findBtn.addActionListener(this);</span>
+
+<span class="fc" id="L83">        findNext.setBounds(225, 28, 115, 20);</span>
+<span class="fc" id="L84">        add(findNext);</span>
+<span class="fc" id="L85">        findNext.addActionListener(this);</span>
+
+<span class="fc" id="L87">        replace.setBounds(225, 50, 115, 20);</span>
+<span class="fc" id="L88">        add(replace);</span>
+<span class="fc" id="L89">        replace.addActionListener(this);</span>
+
+<span class="fc" id="L91">        replaceAll.setBounds(225, 72, 115, 20);</span>
+<span class="fc" id="L92">        add(replaceAll);</span>
+<span class="fc" id="L93">        replaceAll.addActionListener(this);</span>
+
+<span class="fc" id="L95">        cancel.setBounds(225, 94, 115, 20);</span>
+<span class="fc" id="L96">        add(cancel);</span>
+<span class="fc" id="L97">        cancel.addActionListener(this);</span>
+
+
+        // Set the width and height of the window
+<span class="fc" id="L101">        int width = 360;</span>
+<span class="fc" id="L102">        int height = 160;</span>
+
+        // Set size window
+<span class="fc" id="L105">        setSize(width,height);</span>
+
+        // center the frame on the frame
+<span class="fc" id="L108">        setLocationRelativeTo(txt);</span>
+<span class="fc" id="L109">        setVisible(true);</span>
+<span class="fc" id="L110">        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+<span class="fc" id="L111">    }</span>
+
+    public void find() {
+<span class="nc" id="L114">        select_start = txt.getText().indexOf(textF.getText().toLowerCase());</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if(select_start == -1)</span>
+        {
+<span class="nc" id="L117">            startIndex = 0;</span>
+<span class="nc" id="L118">            JOptionPane.showMessageDialog(null, &quot;Could not find \&quot;&quot; + textF.getText() + &quot;\&quot;!&quot;);</span>
+<span class="nc" id="L119">            return;</span>
+        }
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if(select_start == txt.getText().lastIndexOf(textF.getText().toLowerCase()))</span>
+        {
+<span class="nc" id="L123">            startIndex = 0;</span>
+        }
+<span class="nc" id="L125">        int select_end = select_start + textF.getText().length();</span>
+<span class="nc" id="L126">        txt.select(select_start, select_end);</span>
+<span class="nc" id="L127">    }</span>
+
+    public void findNext() {
+<span class="fc" id="L130">        String selection = txt.getSelectedText();</span>
+        try
+        {
+<span class="nc" id="L133">            selection.equals(&quot;&quot;);</span>
+        }
+<span class="fc" id="L135">        catch(NullPointerException e)</span>
+        {
+<span class="fc" id="L137">            selection = textF.getText();</span>
+            try
+            {
+<span class="fc" id="L140">                selection.equals(&quot;&quot;);</span>
+            }
+<span class="nc" id="L142">            catch(NullPointerException e2)</span>
+            {
+<span class="nc" id="L144">                selection = JOptionPane.showInputDialog(&quot;Find:&quot;);</span>
+<span class="nc" id="L145">                textF.setText(selection);</span>
+<span class="fc" id="L146">            }</span>
+<span class="nc" id="L147">        }</span>
+        try
+        {
+<span class="fc" id="L150">            int select_start = txt.getText() .indexOf(selection , startIndex);</span>
+<span class="fc" id="L151">            int select_end = select_start+selection.length();</span>
+<span class="fc" id="L152">            txt.select(select_start, select_end);</span>
+<span class="fc" id="L153">            startIndex = select_end+1;</span>
+
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">            if(select_start == txt.getText().lastIndexOf(selection.toLowerCase()))</span>
+            {
+<span class="fc" id="L157">                startIndex = 0;</span>
+            }
+        }
+<span class="nc" id="L160">        catch(NullPointerException e)</span>
+<span class="fc" id="L161">        {}</span>
+<span class="fc" id="L162">    }</span>
+
+    public void replace() {
+        try
+        {
+<span class="nc" id="L167">            find();</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">            if (select_start != -1)</span>
+<span class="nc" id="L169">            txt.replaceSelection(textR.getText());</span>
+        }
+<span class="nc" id="L171">        catch(NullPointerException e)</span>
+        {
+<span class="nc" id="L173">            System.out.print(&quot;Null Pointer Exception: &quot;+e);</span>
+<span class="nc" id="L174">        }</span>
+<span class="nc" id="L175">    }</span>
+
+    public void replaceAll() {
+<span class="nc" id="L178">        txt.setText(txt.getText().replaceAll(textF.getText() , textR.getText()));</span>
+<span class="nc" id="L179">    }</span>
+
+    public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if(e.getSource() == findBtn)</span>
+        {
+<span class="nc" id="L184">           find();</span>
+        }
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        else if(e.getSource() == findNext)</span>
+        {
+<span class="nc" id="L188">           findNext();</span>
+        }
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        else if(e.getSource() == replace)</span>
+        {
+<span class="nc" id="L192">            replace();</span>
+        }
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        else if(e.getSource() == replaceAll)</span>
+        {
+<span class="nc" id="L196">           replaceAll();</span>
+        }
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        else if(e.getSource() == cancel)</span>
+        {
+<span class="nc" id="L200">           this.setVisible(false);</span>
+        }
+<span class="nc" id="L202">   }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
